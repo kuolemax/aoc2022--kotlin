@@ -112,8 +112,8 @@ fun main() {
         return totalScore
     }
 
-    // val testInput = readInput("Day02_test")
-    // check(part1(testInput) == 64)
+    val testInput = readInput("Day02_test")
+    check(part1(testInput) == 64)
 
     val input = readInput("Day02")
     println(part1(input))
