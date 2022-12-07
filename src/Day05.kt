@@ -16,14 +16,14 @@ fun main() {
     // test if implementation meets criteria from the description, like:
     val testInput = readInput("Day05_test")
     check(part1(testInput) == "CMZ")
-    // check(part2(testInput) == 45000)
+    // check(part2(testInput) == "MCD")
 
     val input = readInput("Day05")
     println(part1(input))
     // println(part2(input))
 }
 
-fun parseStacks(input: List<String>): Pair<Int, List<Stack<String>>> {
+private fun parseStacks(input: List<String>): Pair<Int, MutableList<MutableList<String>>> {
     // 找到 move 所在行，索引即 Cargo 所在行数
     val moveRow = input.first { it -> it.startsWith("move") }
     val moveIndex = input.indexOf(moveRow)
@@ -53,24 +53,44 @@ fun parseStacks(input: List<String>): Pair<Int, List<Stack<String>>> {
         }
     }
 
-    return moveIndex to stackList
+    return moveIndex to stackList.toMutableList()
 }
 
-fun moveCargo(moveList: List<String>, stacks: List<Stack<String>>): String {
+private fun moveCargo(moveList: List<String>, stacks: MutableList<MutableList<String>>): String {
     // 提取移动的起始点和个数
-    val regexPattern = Regex("move (\\d+) from (\\d+) to (\\d+)")
-    val moveOperationList = moveList.map { row ->
-        val find = regexPattern.find(row)
-        Triple(find!!.groupValues[1].toInt(), find.groupValues[2].toInt(), find.groupValues[3].toInt())
-    }
+    val moveOperationList = parseMoveOperations(moveList)
     moveOperationList.forEach { (moveNum, popIndex, addIndex) ->
         (0 until moveNum).forEach { _ ->
-            val popValue = stacks[popIndex - 1].pop()
+            val popValue = stacks[popIndex - 1].removeLast()
             stacks[addIndex - 1].add(popValue)
         }
     }
     
     return stacks.joinToString("") { stack ->
-        stack.pop()
+        stack.last()
     }
+}
+
+private fun multiMoveCargo(moveList: List<String>, stacks: MutableList<MutableList<String>>): String {
+    // 提取移动的起始点和个数
+    val moveOperationList = parseMoveOperations(moveList)
+    moveOperationList.forEach { (moveNum, popIndex, addIndex) ->
+        val popStack = stacks[popIndex - 1]
+        val popCargos = popStack.subList(popStack.size - moveNum, popStack.size)
+        stacks[addIndex - 1].addAll(popCargos)
+        stacks[popIndex - 1] = popStack.subList(0, popStack.size - moveNum + 1)
+    }
+
+    return stacks.joinToString("") { stack ->
+        stack.last()
+    }
+}
+
+private fun parseMoveOperations(moveList: List<String>): List<Triple<Int, Int, Int>> {
+    val regexPattern = Regex("move (\\d+) from (\\d+) to (\\d+)")
+    val moveOperationList = moveList.map { row ->
+        val find = regexPattern.find(row)
+        Triple(find!!.groupValues[1].toInt(), find.groupValues[2].toInt(), find.groupValues[3].toInt())
+    }
+    return moveOperationList
 }
