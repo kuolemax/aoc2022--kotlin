@@ -9,18 +9,20 @@ fun main() {
         return moveCargo(moveRows, stackList)
     }
 
-    // fun part2(input: List<String>): Int {
-    //     TODO()
-    // }
+    fun part2(input: List<String>): String {
+        val (startRow, stackList) = parseStacks(input)
+        val moveRows = input.subList(startRow, input.size)
+        return multiMoveCargo(moveRows, stackList)
+    }
 
     // test if implementation meets criteria from the description, like:
     val testInput = readInput("Day05_test")
     check(part1(testInput) == "CMZ")
-    // check(part2(testInput) == "MCD")
+    check(part2(testInput) == "MCD")
 
     val input = readInput("Day05")
     println(part1(input))
-    // println(part2(input))
+    println(part2(input))
 }
 
 private fun parseStacks(input: List<String>): Pair<Int, MutableList<MutableList<String>>> {
@@ -43,7 +45,7 @@ private fun parseStacks(input: List<String>): Pair<Int, MutableList<MutableList<
         matrix.forEach { row ->
             val index = 2 + col * 4
             val cargoValue = row.substring(index - 1, index)
-            
+
             if (cargoValue.isNotBlank()) {
                 if (stackList.isEmpty() || stackList.size < col + 1) {
                     stackList.add(Stack())
@@ -65,10 +67,8 @@ private fun moveCargo(moveList: List<String>, stacks: MutableList<MutableList<St
             stacks[addIndex - 1].add(popValue)
         }
     }
-    
-    return stacks.joinToString("") { stack ->
-        stack.last()
-    }
+
+    return stacks.joinToString("") { it.last() }
 }
 
 private fun multiMoveCargo(moveList: List<String>, stacks: MutableList<MutableList<String>>): String {
@@ -78,12 +78,10 @@ private fun multiMoveCargo(moveList: List<String>, stacks: MutableList<MutableLi
         val popStack = stacks[popIndex - 1]
         val popCargos = popStack.subList(popStack.size - moveNum, popStack.size)
         stacks[addIndex - 1].addAll(popCargos)
-        stacks[popIndex - 1] = popStack.subList(0, popStack.size - moveNum + 1)
+        stacks[popIndex - 1] = popStack.subList(0, popStack.size - moveNum)
     }
 
-    return stacks.joinToString("") { stack ->
-        stack.last()
-    }
+    return stacks.joinToString("") { it.last() }
 }
 
 private fun parseMoveOperations(moveList: List<String>): List<Triple<Int, Int, Int>> {
